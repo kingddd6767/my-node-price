@@ -10,7 +10,8 @@ export function useUTXOracle() {
   return useQuery<UTXOraclePrice>({
     queryKey: ['utxoracle-price'],
     queryFn: async ({ signal }) => {
-      const res = await fetch('https://api.utxoracle.io/latest.json', { signal });
+      const url = `https://proxy.shakespeare.diy/?url=${encodeURIComponent('https://api.utxoracle.io/latest.json')}`;
+      const res = await fetch(url, { signal });
       if (!res.ok) throw new Error('Failed to fetch price');
       return res.json() as Promise<UTXOraclePrice>;
     },
