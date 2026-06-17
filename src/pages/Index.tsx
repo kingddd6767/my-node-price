@@ -86,8 +86,9 @@ const Index = () => {
 
   const usdPrice = data?.price ?? 0;
 
-  // Convert USD price to active currency
-  const rate = activeCurrency === 'KES' ? (rateData?.rate ?? 0) : 1;
+  // Convert USD price to active currency.
+  // Default rate to 1 (not 0) while loading to avoid dividing by zero.
+  const rate = activeCurrency === 'KES' ? (rateData?.rate ?? 1) : 1;
   const price = usdPrice * rate; // price of 1 BTC in active currency
 
   const currencyConfig = CURRENCIES.find((c) => c.code === activeCurrency)!;
