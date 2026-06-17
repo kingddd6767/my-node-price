@@ -328,7 +328,7 @@ const Index = () => {
           UTXOracle derives the Bitcoin price directly from the Bitcoin blockchain
           itself — no trusted third party, no API keys, no censorship. It reads
           UTXO spending patterns on-chain to produce a consensus price.
-          {activeCurrency === 'KES' && ' KES rates are sourced from the Frankfurter open exchange rate API.'}
+          {activeCurrency === 'KES' && ' KES rates are sourced from open.er-api.com.'}
         </p>
         <a
           href="https://utxoracle.io"
