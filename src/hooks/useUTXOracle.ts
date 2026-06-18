@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-interface UTXOraclePrice {
+export interface UTXOraclePrice {
   price_usd: number;
   date: string;
   mode: string;
@@ -8,21 +8,18 @@ interface UTXOraclePrice {
   source: string;
   trigger_block_hash: string;
   updated_at: string;
-  // Normalised field used throughout the app
-  price: number;
 }
 
 export function useUTXOracle() {
   return useQuery<UTXOraclePrice>({
     queryKey: ['utxoracle-price'],
     queryFn: async ({ signal }) => {
-      const res = await fetch('https://nutmix.note-teeth.ts.net/latest.json', { signal });
+      const url = `https://proxy.shakespeare.diy/?url=${encodeURIComponent('https://nutmix.note-teeth.ts.net/latest.json')}`;
+      const res = await fetch(url, { signal });
       if (!res.ok) throw new Error('Failed to fetch price');
-      const json = await res.json() as Omit<UTXOraclePrice, 'price'>;
-      // Normalise price_usd → price so the rest of the app doesn't need to change
-      return { ...json, price: json.price_usd };
+      return res.json() as Promise<UTXOraclePrice>;
     },
-    refetchInterval: 60_000,
+    refetchInterval: 60_000, // refresh every 60 seconds
     staleTime: 30_000,
   });
 }
