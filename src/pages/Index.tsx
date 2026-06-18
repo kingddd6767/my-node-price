@@ -50,18 +50,19 @@ const Index = () => {
   });
 
   const { data, isLoading, isError, refetch, isFetching } = useUTXOracle();
-  const isUsingCache = isError && !!data;
 
   const [usdInput, setUsdInput] = useState('');
   const [btcInput, setBtcInput] = useState('');
+  const [activePreset, setActivePreset] = useState<number | null>(null);
 
   const price = data?.price_usd ?? 0;
 
   // USD → BTC
   const handleUsdChange = useCallback(
-    (raw: string) => {
+    (raw: string, fromPreset = false) => {
       const cleaned = raw.replace(/[^0-9.]/g, '');
       setUsdInput(cleaned);
+      if (!fromPreset) setActivePreset(null);
       if (cleaned === '' || !price) {
         setBtcInput('');
         return;
@@ -98,7 +99,8 @@ const Index = () => {
   );
 
   const applyPreset = (usd: number) => {
-    handleUsdChange(String(usd));
+    setActivePreset(usd);
+    handleUsdChange(String(usd), true);
   };
 
   // derived display values
@@ -135,10 +137,10 @@ const Index = () => {
       </div>
 
       {/* ── price badge ─────────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex items-center gap-3">
         {isLoading ? (
           <Skeleton className="h-9 w-52 rounded-full" />
-        ) : isError && !data ? (
+        ) : isError ? (
           <Badge variant="destructive" className="text-sm px-4 py-1.5 gap-2">
             <AlertCircle className="w-4 h-4" />
             Failed to load price
@@ -162,12 +164,6 @@ const Index = () => {
               </span>
             )}
           </div>
-        )}
-        {isUsingCache && (
-          <span className="text-xs text-amber-500 dark:text-amber-400 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            Node unreachable — showing cached price from {formatTimeAgo(data!.updated_at)}
-          </span>
         )}
       </div>
 
@@ -248,9 +244,7 @@ const Index = () => {
               <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
                 <span className="font-semibold text-zinc-700 dark:text-zinc-300">Price source: </span>
                 {data.source}. The price is a <span className="font-medium text-zinc-600 dark:text-zinc-300">144-block rolling average</span> (~24 hrs) derived entirely on-chain — no exchange rate API or trusted third party is used.{' '}
-                <span className="text-zinc-400 dark:text-zinc-500 italic">
-                  Note: KES/USD conversion (if used) relies on a separate fiat exchange rate.
-                </span>
+
               </p>
             </div>
           )}
@@ -268,7 +262,11 @@ const Index = () => {
               key={usd}
               onClick={() => applyPreset(usd)}
               disabled={!price}
-              className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 px-2 py-2.5 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`rounded-xl border px-2 py-2.5 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                activePreset === usd
+                  ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/30'
+                  : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400'
+              }`}
             >
               ${usd >= 1000 ? `${usd / 1000}k` : usd}
             </button>
