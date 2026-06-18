@@ -53,14 +53,16 @@ const Index = () => {
 
   const [usdInput, setUsdInput] = useState('');
   const [btcInput, setBtcInput] = useState('');
+  const [activePreset, setActivePreset] = useState<number | null>(null);
 
   const price = data?.price_usd ?? 0;
 
   // USD → BTC
   const handleUsdChange = useCallback(
-    (raw: string) => {
+    (raw: string, fromPreset = false) => {
       const cleaned = raw.replace(/[^0-9.]/g, '');
       setUsdInput(cleaned);
+      if (!fromPreset) setActivePreset(null);
       if (cleaned === '' || !price) {
         setBtcInput('');
         return;
@@ -97,7 +99,8 @@ const Index = () => {
   );
 
   const applyPreset = (usd: number) => {
-    handleUsdChange(String(usd));
+    setActivePreset(usd);
+    handleUsdChange(String(usd), true);
   };
 
   // derived display values
@@ -261,7 +264,11 @@ const Index = () => {
               key={usd}
               onClick={() => applyPreset(usd)}
               disabled={!price}
-              className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 px-2 py-2.5 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`rounded-xl border px-2 py-2.5 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                activePreset === usd
+                  ? 'bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-500/30'
+                  : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400'
+              }`}
             >
               ${usd >= 1000 ? `${usd / 1000}k` : usd}
             </button>
