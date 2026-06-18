@@ -240,7 +240,7 @@ const Index = () => {
               <Server className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
               <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
                 <span className="font-semibold text-zinc-700 dark:text-zinc-300">Price source: </span>
-                {data.source}. The USD price is derived on-chain from the Bitcoin blockchain — no exchange rate API or trusted third party is used.{' '}
+                {data.source}. The price is a <span className="font-medium text-zinc-600 dark:text-zinc-300">144-block rolling average</span> (~24 hrs) derived entirely on-chain — no exchange rate API or trusted third party is used.{' '}
                 <span className="text-zinc-400 dark:text-zinc-500 italic">
                   Note: KES/USD conversion (if used) relies on a separate fiat exchange rate.
                 </span>
@@ -283,8 +283,10 @@ const Index = () => {
         <p>
           This calculator fetches the price from a{' '}
           <span className="font-medium text-zinc-600 dark:text-zinc-300">personal Bitcoin node</span>{' '}
-          running UTXOracle locally, rather than a centralised API. The price reflects
-          confirmed blocks on-chain and is updated with each new block.
+          running UTXOracle locally, rather than a centralised API. The price is a{' '}
+          <span className="font-medium text-zinc-600 dark:text-zinc-300">144-block rolling average</span>{' '}
+          (roughly 24 hours of blocks), smoothing out short-term volatility while staying
+          fully grounded in on-chain data.
         </p>
         <a
           href="https://utxoracle.io"
