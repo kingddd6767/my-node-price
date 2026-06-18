@@ -122,7 +122,7 @@ const Index = () => {
         <p className="text-zinc-500 dark:text-zinc-400 text-sm">
           Powered by{' '}
           <a
-            href="https://utxoracle.io"
+          href="https://utxo.live/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-orange-500 hover:text-orange-600 font-medium underline-offset-2 hover:underline"
@@ -289,7 +289,7 @@ const Index = () => {
           fully grounded in on-chain data.
         </p>
         <a
-          href="https://utxoracle.io"
+            href="https://utxo.live/"
           target="_blank"
           rel="noopener noreferrer"
           className="text-orange-500 hover:text-orange-600 font-medium hover:underline underline-offset-2"
