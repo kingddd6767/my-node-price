@@ -364,3 +364,12 @@ All three must be done together. Never bump a version without updating the chang
 Use `git status` / `git diff` to review changes and `git log` to learn project conventions. If you make a mistake, `git checkout` restores files.
 
 **Always commit when you are finished.** Non-negotiable — every completed task ends with a commit. Don't wait for the user to ask.
+
+**This project has two remotes — always push to both after committing:**
+
+```
+git push origin main && git push github main
+```
+
+- **origin** → Nostr (Shakespeare git): `nostr://npub14vr3mcc5t6cxpr03xpv0f2lt9k94qnq9mm2phqw4k0jqzp97m83qycsplz/git.shakespeare.diy/utxoracle-btc-calculator`
+- **github** → GitHub: `https://github.com/kingddd6767/my-node-price`
