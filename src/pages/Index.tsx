@@ -51,8 +51,8 @@ const USD_PRESETS = [1, 5, 10, 25, 50, 100, 500, 1000];
 
 const Index = () => {
   useSeoMeta({
-    title: 'UTXOracle BTC Calculator',
-    description: 'Convert USD to Bitcoin using UTXOracle running on a personal Bitcoin node.',
+    title: 'Node Price',
+    description: 'Convert USD to Bitcoin using a real price derived from your own Bitcoin node.',
   });
 
   const { data, isLoading, isError, refetch, isFetching } = useUTXOracle();
@@ -167,7 +167,7 @@ const Index = () => {
             <Bitcoin className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            BTC Calculator
+            Node Price
           </h1>
         </div>
         <p className="text-zinc-500 dark:text-zinc-400 text-sm">
