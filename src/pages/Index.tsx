@@ -51,8 +51,8 @@ const USD_PRESETS = [1, 5, 10, 25, 50, 100, 500, 1000];
 
 const Index = () => {
   useSeoMeta({
-    title: 'Node Price',
-    description: 'Convert USD to Bitcoin using a real price derived from your own Bitcoin node.',
+    title: "My Node's Price",
+    description: "Convert USD to Bitcoin using a real price derived from your own Bitcoin node.",
   });
 
   const { data, isLoading, isError, refetch, isFetching } = useUTXOracle();
@@ -167,7 +167,7 @@ const Index = () => {
             <Bitcoin className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            Node Price
+            My Node's Price
           </h1>
         </div>
         <p className="text-zinc-500 dark:text-zinc-400 text-sm">
