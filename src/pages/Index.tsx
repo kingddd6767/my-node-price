@@ -642,6 +642,14 @@ const Index = () => {
             Fork on Nostr
           </a>
         </div>
+        {/* edit with shakespeare badge */}
+        <a
+          href="https://shakespeare.diy/clone?url=nostr%3A%2F%2Fnpub14vr3mcc5t6cxpr03xpv0f2lt9k94qnq9mm2phqw4k0jqzp97m83qycsplz%2Fgit.shakespeare.diy%2Futxoracle-btc-calculator"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img src="https://shakespeare.diy/badge.svg" alt="Edit with Shakespeare" className="h-auto" />
+        </a>
         {/* version + credit */}
         <p className="text-xs text-zinc-400 dark:text-zinc-600 flex items-center gap-2">
           <Link to="/changelog" className="hover:text-orange-500 transition-colors">
