@@ -56,6 +56,7 @@ const Index = () => {
   });
 
   const { data, isLoading, isError, refetch, isFetching } = useUTXOracle();
+  const isUsingCache = isError && !!data;
 
   // ── currency state (persisted) ───────────────────────────────────────────
   const [savedCurrency, setSavedCurrency] = useLocalStorage<string>('btc-calc-currency', 'USD', {
@@ -184,10 +185,10 @@ const Index = () => {
       </div>
 
       {/* ── price badge ─────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col items-center gap-2">
         {isPriceLoading ? (
           <Skeleton className="h-9 w-52 rounded-full" />
-        ) : isError ? (
+        ) : isError && !data ? (
           <Badge variant="destructive" className="text-sm px-4 py-1.5 gap-2">
             <AlertCircle className="w-4 h-4" />
             Failed to load price
@@ -211,6 +212,12 @@ const Index = () => {
               </span>
             )}
           </div>
+        )}
+        {isUsingCache && (
+          <span className="text-xs text-amber-500 dark:text-amber-400 flex items-center gap-1">
+            <AlertCircle className="w-3 h-3" />
+            Node unreachable — showing cached price from {formatTimeAgo(data!.updated_at)}
+          </span>
         )}
       </div>
 
