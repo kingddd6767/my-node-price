@@ -1,5 +1,5 @@
 import { useSeoMeta } from '@unhead/react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useUTXOracle } from '@/hooks/useUTXOracle';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bitcoin, RefreshCw, ArrowRightLeft, AlertCircle, Server, Globe, X, Check } from 'lucide-react';
+import { Bitcoin, RefreshCw, ArrowRightLeft, AlertCircle, Server, Globe, X, Check, Share2, Copy } from 'lucide-react';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -47,6 +47,27 @@ function formatTimeAgo(isoString: string): string {
 
 const USD_PRESETS = [1, 5, 10, 25, 50, 100, 500, 1000];
 
+// ── URL param helpers ──────────────────────────────────────────────────────
+
+function getUrlParams() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    currency: p.get('currency')?.toUpperCase() ?? null,
+    mode: p.get('mode') === 'btc' ? 'btc' as const : p.get('mode') === 'sats' ? 'sats' as const : null,
+    fiat: p.get('fiat') ?? null,
+    btc: p.get('btc') ?? null,
+  };
+}
+
+function buildShareUrl(currency: string, mode: 'sats' | 'btc', fiat: string, btc: string): string {
+  const p = new URLSearchParams();
+  p.set('currency', currency);
+  p.set('mode', mode);
+  if (fiat) p.set('fiat', fiat);
+  if (btc) p.set('btc', btc);
+  return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
+}
+
 // ── component ─────────────────────────────────────────────────────────────
 
 const Index = () => {
@@ -58,14 +79,19 @@ const Index = () => {
   const { data, isLoading, isError, refetch, isFetching } = useUTXOracle();
   const isUsingCache = isError && !!data;
 
-  // ── currency state (persisted) ───────────────────────────────────────────
+  // ── read URL params once on mount ────────────────────────────────────────
+  const urlParams = useRef(getUrlParams());
+
+  // ── currency state (persisted, URL param wins) ───────────────────────────
   const [savedCurrency, setSavedCurrency] = useLocalStorage<string>('btc-calc-currency', 'USD', {
     serialize: (v) => v,
     deserialize: (v) => v.toUpperCase(),
   });
-  const [activeCurrency, setActiveCurrency] = useState<string>(savedCurrency);
+  const [activeCurrency, setActiveCurrency] = useState<string>(
+    urlParams.current.currency ?? savedCurrency
+  );
 
-  // ── sats vs BTC mode (persisted, default: sats) ──────────────────────────
+  // ── sats vs BTC mode (persisted, URL param wins) ─────────────────────────
   const [btcMode, setBtcMode] = useLocalStorage<'sats' | 'btc'>('btc-calc-btcmode', 'sats', {
     serialize: (v) => v,
     deserialize: (v) => (v === 'btc' ? 'btc' : 'sats'),
@@ -105,10 +131,19 @@ const Index = () => {
   const rate = isUSD ? 1 : (rateData?.rate ?? 1);
   const price = usdPrice * rate; // fiat per BTC
 
+  // ── share button state ───────────────────────────────────────────────────
+  const [shareCopied, setShareCopied] = useState(false);
+
   // ── calculator state ─────────────────────────────────────────────────────
-  const [fiatInput, setFiatInput] = useState('');
-  const [btcInput, setBtcInput] = useState('');
+  const [fiatInput, setFiatInput] = useState(urlParams.current.fiat ?? '');
+  const [btcInput, setBtcInput] = useState(urlParams.current.btc ?? '');
   const [activePreset, setActivePreset] = useState<number | null>(null);
+
+  // Apply URL mode param after mount (needs setBtcMode which is from hook)
+  useEffect(() => {
+    if (urlParams.current.mode) setBtcMode(urlParams.current.mode);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── currency switcher ────────────────────────────────────────────────────
   const switchCurrency = useCallback((currency: string) => {
@@ -175,6 +210,22 @@ const Index = () => {
     setActivePreset(usd);
     handleFiatChange(fiatAmount.toFixed(2), true);
   };
+
+  // ── share handler ────────────────────────────────────────────────────────
+  const handleShare = useCallback(async () => {
+    const url = buildShareUrl(activeCurrency, btcMode, fiatInput, btcInput);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "My Node's Price", url });
+      } catch {
+        // user cancelled — do nothing
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }, [activeCurrency, btcMode, fiatInput, btcInput]);
 
   // derived display values
   const satsDisplay = fiatInput && price
@@ -454,6 +505,31 @@ const Index = () => {
               </p>
             </div>
           )}
+
+          {/* share button */}
+          <button
+            onClick={handleShare}
+            className={`w-full h-11 rounded-xl border font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+              shareCopied
+                ? 'bg-green-500 border-green-500 text-white'
+                : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400'
+            }`}
+          >
+            {shareCopied ? (
+              <>
+                <Check className="w-4 h-4" />
+                Link copied!
+              </>
+            ) : (
+              <>
+                {typeof navigator !== 'undefined' && 'share' in navigator
+                  ? <Share2 className="w-4 h-4" />
+                  : <Copy className="w-4 h-4" />
+                }
+                Share this conversion
+              </>
+            )}
+          </button>
         </CardContent>
       </Card>
 
@@ -511,7 +587,7 @@ const Index = () => {
 
       {/* ── footer ───────────────────────────────────────────── */}
       <p className="text-xs text-zinc-400 dark:text-zinc-600 pb-4 flex items-center gap-2">
-        <span>v1.2</span>
+        <span>v1.3</span>
         <span>·</span>
         <span>Vibed with{' '}
           <a
