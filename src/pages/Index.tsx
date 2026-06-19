@@ -1,5 +1,6 @@
 import { useSeoMeta } from '@unhead/react';
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useUTXOracle } from '@/hooks/useUTXOracle';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -144,6 +145,19 @@ const Index = () => {
     if (urlParams.current.mode) setBtcMode(urlParams.current.mode);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When price loads and we have URL params, recalculate from fiat to keep values fresh
+  const urlParamsApplied = useRef(false);
+  useEffect(() => {
+    if (!price || urlParamsApplied.current) return;
+    if (!urlParams.current.fiat) return;
+    urlParamsApplied.current = true;
+    const val = parseFloat(urlParams.current.fiat);
+    if (isNaN(val)) return;
+    const sats = (val / price) * 1e8;
+    const mode = urlParams.current.mode ?? btcMode;
+    setBtcInput(mode === 'sats' ? String(Math.round(sats)) : formatBTC(sats));
+  }, [price, btcMode]);
 
   // ── currency switcher ────────────────────────────────────────────────────
   const switchCurrency = useCallback((currency: string) => {
@@ -587,7 +601,9 @@ const Index = () => {
 
       {/* ── footer ───────────────────────────────────────────── */}
       <p className="text-xs text-zinc-400 dark:text-zinc-600 pb-4 flex items-center gap-2">
-        <span>v1.3</span>
+        <Link to="/changelog" className="hover:text-orange-500 transition-colors">
+          v1.3
+        </Link>
         <span>·</span>
         <span>Vibed with{' '}
           <a
