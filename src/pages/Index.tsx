@@ -619,7 +619,7 @@ const Index = () => {
       {/* ── footer ───────────────────────────────────────────── */}
       <p className="text-xs text-zinc-400 dark:text-zinc-600 pb-4 flex items-center gap-2">
         <Link to="/changelog" className="hover:text-orange-500 transition-colors">
-          v1.4
+          v1.3
         </Link>
         <span>·</span>
         <span>Vibed with{' '}

@@ -10,16 +10,6 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '1.4',
-    date: '2026-06-19',
-    changes: [
-      'Price badge now shows sats per fiat unit in sats mode (e.g. "1 USD = 1,543 sats")',
-      'If 1 unit of fiat is worth less than 1 sat, the badge flips to show fiat per sat (e.g. "1 sat = KES 8.23")',
-      'Shared URLs no longer include the BTC/sats value — fiat is the source of truth and BTC recalculates fresh from the live price when a link is opened',
-      'Added this changelog page, accessible by tapping the version number in the footer',
-    ],
-  },
-  {
     version: '1.3',
     date: '2026-06-19',
     changes: [
@@ -27,6 +17,9 @@ const CHANGELOG: ChangelogEntry[] = [
       'On mobile uses the native share sheet; on desktop copies the link to clipboard',
       'Opening a shared link restores the exact state — currency, mode, and fiat value pre-filled',
       'BTC/sats value recalculates from the live price when a shared link is opened',
+      'Price badge now shows sats per fiat unit in sats mode (e.g. "1 USD = 1,543 sats")',
+      'If 1 unit of fiat is worth less than 1 sat, the badge flips to show fiat per sat (e.g. "1 sat = KES 8.23")',
+      'Added this changelog page, accessible by tapping the version number in the footer',
     ],
   },
   {
