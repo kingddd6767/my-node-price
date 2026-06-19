@@ -65,11 +65,36 @@ const Index = () => {
   });
   const [activeCurrency, setActiveCurrency] = useState<string>(savedCurrency);
 
+  // ── sats vs BTC mode (persisted, default: sats) ──────────────────────────
+  const [btcMode, setBtcMode] = useLocalStorage<'sats' | 'btc'>('btc-calc-btcmode', 'sats', {
+    serialize: (v) => v,
+    deserialize: (v) => (v === 'btc' ? 'btc' : 'sats'),
+  });
+
   // ── secret currency picker state ─────────────────────────────────────────
   const [pickerOpen, setPickerOpen] = useState(false);
   const [currencyInput, setCurrencyInput] = useState('');
   const [currencyError, setCurrencyError] = useState('');
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currencyLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── long-press on ₿ label to toggle sats/btc ─────────────────────────────
+  const btcLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [btcLabelFlash, setBtcLabelFlash] = useState(false);
+
+  const handleBtcLabelDown = () => {
+    btcLongPressTimer.current = setTimeout(() => {
+      const next = btcMode === 'sats' ? 'btc' : 'sats';
+      setBtcMode(next);
+      setFiatInput('');
+      setBtcInput('');
+      setActivePreset(null);
+      setBtcLabelFlash(true);
+      setTimeout(() => setBtcLabelFlash(false), 600);
+    }, 600);
+  };
+  const handleBtcLabelUp = () => {
+    if (btcLongPressTimer.current) clearTimeout(btcLongPressTimer.current);
+  };
 
   // ── exchange rate (only when non-USD) ────────────────────────────────────
   const isUSD = activeCurrency === 'USD';
@@ -78,7 +103,7 @@ const Index = () => {
   // price of 1 BTC in active currency
   const usdPrice = data?.price_usd ?? 0;
   const rate = isUSD ? 1 : (rateData?.rate ?? 1);
-  const price = usdPrice * rate;
+  const price = usdPrice * rate; // fiat per BTC
 
   // ── calculator state ─────────────────────────────────────────────────────
   const [fiatInput, setFiatInput] = useState('');
@@ -109,10 +134,10 @@ const Index = () => {
 
   // Long-press on the currency label to open the secret picker
   const handleLabelMouseDown = () => {
-    longPressTimer.current = setTimeout(() => setPickerOpen(true), 800);
+    currencyLongPressTimer.current = setTimeout(() => setPickerOpen(true), 800);
   };
   const handleLabelMouseUp = () => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    if (currencyLongPressTimer.current) clearTimeout(currencyLongPressTimer.current);
   };
 
   // ── conversion handlers ──────────────────────────────────────────────────
@@ -124,9 +149,10 @@ const Index = () => {
       if (cleaned === '' || !price) { setBtcInput(''); return; }
       const val = parseFloat(cleaned);
       if (isNaN(val)) { setBtcInput(''); return; }
-      setBtcInput(formatBTC((val / price) * 1e8));
+      const sats = (val / price) * 1e8;
+      setBtcInput(btcMode === 'sats' ? String(Math.round(sats)) : formatBTC(sats));
     },
-    [price],
+    [price, btcMode],
   );
 
   const handleBtcChange = useCallback(
@@ -137,25 +163,30 @@ const Index = () => {
       if (cleaned === '' || !price) { setFiatInput(''); return; }
       const val = parseFloat(cleaned);
       if (isNaN(val)) { setFiatInput(''); return; }
-      setFiatInput((val * price).toFixed(2));
+      // val is either sats or BTC depending on mode
+      const btcVal = btcMode === 'sats' ? val / 1e8 : val;
+      setFiatInput((btcVal * price).toFixed(2));
     },
-    [price],
+    [price, btcMode],
   );
 
   const applyPreset = (usd: number) => {
-    // presets are always in USD; convert to active currency for display
     const fiatAmount = isUSD ? usd : usd * rate;
     setActivePreset(usd);
     handleFiatChange(fiatAmount.toFixed(2), true);
   };
 
   // derived display values
-  const satsValue = fiatInput && price
+  const satsDisplay = fiatInput && price
     ? Math.round((parseFloat(fiatInput) / price) * 1e8)
     : null;
 
   const isPriceLoading = isLoading || (!isUSD && isRateLoading);
   const currencySymbol = isUSD ? '$' : activeCurrency;
+
+  const btcLabel = btcMode === 'sats' ? 'Satoshis (sats)' : 'Bitcoin (BTC)';
+  const btcPlaceholder = btcMode === 'sats' ? '0' : '0.00000000';
+  const btcSymbol = btcMode === 'sats' ? 'sats' : '₿';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 flex flex-col items-center justify-center p-4 gap-8">
@@ -228,7 +259,6 @@ const Index = () => {
           {/* Fiat field */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              {/* Long-press this label to open the secret currency picker */}
               <label
                 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide select-none cursor-default"
                 onMouseDown={handleLabelMouseDown}
@@ -320,33 +350,72 @@ const Index = () => {
             <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
           </div>
 
-          {/* BTC field */}
+          {/* Sats / BTC field */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-              Bitcoin (BTC)
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                className={`text-sm font-medium uppercase tracking-wide select-none cursor-default transition-colors ${
+                  btcLabelFlash
+                    ? 'text-orange-500'
+                    : 'text-zinc-500 dark:text-zinc-400'
+                }`}
+                onMouseDown={handleBtcLabelDown}
+                onMouseUp={handleBtcLabelUp}
+                onMouseLeave={handleBtcLabelUp}
+                onTouchStart={handleBtcLabelDown}
+                onTouchEnd={handleBtcLabelUp}
+                title="Hold to switch between sats and BTC"
+              >
+                {btcLabel}
+              </label>
+              <button
+                onClick={() => {
+                  const next = btcMode === 'sats' ? 'btc' : 'sats';
+                  setBtcMode(next);
+                  setFiatInput('');
+                  setBtcInput('');
+                  setActivePreset(null);
+                }}
+                className="text-xs text-zinc-400 hover:text-orange-500 transition-colors flex items-center gap-1"
+                title="Switch between sats and BTC"
+              >
+                <ArrowRightLeft className="w-3 h-3" />
+                {btcMode === 'sats' ? 'Switch to BTC' : 'Switch to sats'}
+              </button>
+            </div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 font-bold text-lg select-none">
-                ₿
+              <span className={`absolute left-3 top-1/2 -translate-y-1/2 font-bold text-lg select-none ${btcMode === 'sats' ? 'text-orange-500 text-sm' : 'text-orange-500'}`}>
+                {btcSymbol}
               </span>
               <Input
                 type="text"
                 inputMode="decimal"
-                placeholder="0.00000000"
+                placeholder={btcPlaceholder}
                 value={btcInput}
                 onChange={(e) => handleBtcChange(e.target.value)}
-                className="pl-8 h-14 text-xl font-semibold rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-orange-400"
+                className="pl-12 h-14 text-xl font-semibold rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-orange-400"
               />
             </div>
           </div>
 
-          {/* sats conversion */}
-          {satsValue !== null && satsValue > 0 && (
+          {/* show the other BTC unit below */}
+          {satsDisplay !== null && satsDisplay > 0 && (
             <div className="rounded-xl bg-orange-50 dark:bg-zinc-800/60 border border-orange-100 dark:border-zinc-700 px-4 py-3 flex items-center justify-between">
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">Satoshis</span>
-              <span className="font-mono font-semibold text-orange-600 dark:text-orange-400 text-sm">
-                {formatSats(satsValue)} sats
-              </span>
+              {btcMode === 'sats' ? (
+                <>
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Bitcoin</span>
+                  <span className="font-mono font-semibold text-orange-600 dark:text-orange-400 text-sm">
+                    {formatBTC(satsDisplay)} BTC
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Satoshis</span>
+                  <span className="font-mono font-semibold text-orange-600 dark:text-orange-400 text-sm">
+                    {formatSats(satsDisplay)} sats
+                  </span>
+                </>
+              )}
             </div>
           )}
 
