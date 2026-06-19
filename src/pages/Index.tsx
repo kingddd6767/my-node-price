@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bitcoin, RefreshCw, ArrowRightLeft, AlertCircle, Server, Globe, X, Check, Share2, Copy, GitBranch } from 'lucide-react';
+import { Bitcoin, RefreshCw, ArrowRightLeft, AlertCircle, Server, Globe, X, Check, Share2, Copy } from 'lucide-react';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -631,42 +631,21 @@ const Index = () => {
             </svg>
             GitHub
           </a>
-          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+
+        </div>
+        {/* edit with shakespeare badge + version */}
+        <div className="flex items-center gap-3">
           <a
             href="https://shakespeare.diy/clone?url=nostr%3A%2F%2Fnpub14vr3mcc5t6cxpr03xpv0f2lt9k94qnq9mm2phqw4k0jqzp97m83qycsplz%2Fgit.shakespeare.diy%2Futxoracle-btc-calculator"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-orange-500 dark:text-zinc-500 dark:hover:text-orange-400 transition-colors"
           >
-            <GitBranch className="w-3.5 h-3.5" />
-            Fork on Nostr
+            <img src="https://shakespeare.diy/badge.svg" alt="Edit with Shakespeare" className="h-auto" />
           </a>
-        </div>
-        {/* edit with shakespeare badge */}
-        <a
-          href="https://shakespeare.diy/clone?url=nostr%3A%2F%2Fnpub14vr3mcc5t6cxpr03xpv0f2lt9k94qnq9mm2phqw4k0jqzp97m83qycsplz%2Fgit.shakespeare.diy%2Futxoracle-btc-calculator"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://shakespeare.diy/badge.svg" alt="Edit with Shakespeare" className="h-auto" />
-        </a>
-        {/* version + credit */}
-        <p className="text-xs text-zinc-400 dark:text-zinc-600 flex items-center gap-2">
-          <Link to="/changelog" className="hover:text-orange-500 transition-colors">
+          <Link to="/changelog" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-orange-500 transition-colors">
             v1.3
           </Link>
-          <span>·</span>
-          <span>Vibed with{' '}
-            <a
-              href="https://shakespeare.diy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-orange-500 transition-colors"
-            >
-              Shakespeare
-            </a>
-          </span>
-        </p>
+        </div>
       </div>
     </div>
   );
