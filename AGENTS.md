@@ -331,6 +331,24 @@ For font installation, color-scheme changes, light/dark theming, or the `isolate
 
 **Writing new test files — don't, unless the user asks.** If the user explicitly requests tests, describes a bug to diagnose with a test, or reports that a problem persists after a fix, load the **`testing`** skill for the project's Vitest + `TestApp` setup and policy.
 
+## Changelog Policy
+
+This project has a user-facing changelog at `src/pages/Changelog.tsx` and a `/changelog` route.
+
+**Every time a version is bumped, you MUST update the changelog.** This includes:
+
+1. Adding a new entry at the top of the `CHANGELOG` array in `src/pages/Changelog.tsx`
+2. Setting the correct version number and today's date
+3. Writing clear, user-friendly bullet points describing what changed (not commit messages — explain it in plain English)
+4. Marking the new entry with `Latest` automatically (it's always `CHANGELOG[0]`)
+
+**When bumping a version:**
+- Update `"version"` in `package.json`
+- Update the `v1.x` label in the footer of `src/pages/Index.tsx`
+- Add the changelog entry in `src/pages/Changelog.tsx`
+
+All three must be done together. Never bump a version without updating the changelog.
+
 ## Validating Your Changes
 
 **Your task is not finished until the code type-checks and builds without errors.** In priority order:
