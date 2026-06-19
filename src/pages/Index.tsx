@@ -442,7 +442,7 @@ const Index = () => {
 
       {/* ── footer ───────────────────────────────────────────── */}
       <p className="text-xs text-zinc-400 dark:text-zinc-600 pb-4 flex items-center gap-2">
-        <span>v1.1</span>
+        <span>v1.2</span>
         <span>·</span>
         <span>Vibed with{' '}
           <a
