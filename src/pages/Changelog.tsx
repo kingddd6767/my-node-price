@@ -16,10 +16,12 @@ const CHANGELOG: ChangelogEntry[] = [
       'Added share button — encodes currency, sats/BTC mode, and fiat value into a shareable URL',
       'On mobile uses the native share sheet; on desktop copies the link to clipboard',
       'Opening a shared link restores the exact state — currency, mode, and fiat value pre-filled',
-      'BTC/sats value recalculates from the live price when a shared link is opened',
+      'BTC/sats value recalculates from the live price when a shared link is opened (fiat is the source of truth)',
       'Price badge now shows sats per fiat unit in sats mode (e.g. "1 USD = 1,543 sats")',
       'If 1 unit of fiat is worth less than 1 sat, the badge flips to show fiat per sat (e.g. "1 sat = KES 8.23")',
       'Added this changelog page, accessible by tapping the version number in the footer',
+      'Added GitHub and Edit with Shakespeare links to the footer',
+      'Added CC0 1.0 public domain license — anyone can use, copy, or modify freely',
     ],
   },
   {
