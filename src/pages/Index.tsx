@@ -56,16 +56,14 @@ function getUrlParams() {
     currency: p.get('currency')?.toUpperCase() ?? null,
     mode: p.get('mode') === 'btc' ? 'btc' as const : p.get('mode') === 'sats' ? 'sats' as const : null,
     fiat: p.get('fiat') ?? null,
-    btc: p.get('btc') ?? null,
   };
 }
 
-function buildShareUrl(currency: string, mode: 'sats' | 'btc', fiat: string, btc: string): string {
+function buildShareUrl(currency: string, mode: 'sats' | 'btc', fiat: string): string {
   const p = new URLSearchParams();
   p.set('currency', currency);
   p.set('mode', mode);
   if (fiat) p.set('fiat', fiat);
-  if (btc) p.set('btc', btc);
   return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
 }
 
@@ -137,7 +135,7 @@ const Index = () => {
 
   // ── calculator state ─────────────────────────────────────────────────────
   const [fiatInput, setFiatInput] = useState(urlParams.current.fiat ?? '');
-  const [btcInput, setBtcInput] = useState(urlParams.current.btc ?? '');
+  const [btcInput, setBtcInput] = useState('');
   const [activePreset, setActivePreset] = useState<number | null>(null);
 
   // Apply URL mode param after mount (needs setBtcMode which is from hook)
@@ -227,7 +225,7 @@ const Index = () => {
 
   // ── share handler ────────────────────────────────────────────────────────
   const handleShare = useCallback(async () => {
-    const url = buildShareUrl(activeCurrency, btcMode, fiatInput, btcInput);
+    const url = buildShareUrl(activeCurrency, btcMode, fiatInput);
     if (navigator.share) {
       try {
         await navigator.share({ title: "My Node's Price", url });
