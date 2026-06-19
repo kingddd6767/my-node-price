@@ -22,6 +22,8 @@ const CHANGELOG: ChangelogEntry[] = [
       'Added this changelog page, accessible by tapping the version number in the footer',
       'Added GitHub and Edit with Shakespeare links to the footer',
       'Added CC0 1.0 public domain license — anyone can use, copy, or modify freely',
+      'Added README on GitHub with full feature list, tech stack, and setup instructions',
+      'Removed unintended GitHub Pages auto-deploy workflow',
     ],
   },
   {
