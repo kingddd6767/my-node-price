@@ -249,6 +249,25 @@ const Index = () => {
   const isPriceLoading = isLoading || (!isUSD && isRateLoading);
   const currencySymbol = isUSD ? '$' : activeCurrency;
 
+  // ── contextual price badge text ──────────────────────────────────────────
+  const priceBadgeText = (() => {
+    if (!price) return '';
+    if (btcMode === 'btc') {
+      return `1 BTC = ${formatFiat(price, activeCurrency)}`;
+    }
+    // sats mode: show sats per 1 unit of fiat
+    const satsPerFiat = 1e8 / price; // sats per 1 fiat unit
+    if (satsPerFiat >= 1) {
+      // e.g. "1 USD = 1,543 sats"
+      return `1 ${activeCurrency} = ${formatSats(satsPerFiat)} sats`;
+    } else {
+      // fiat is worth less than 1 sat — flip it
+      // e.g. "1 sat = KES 8.23"
+      const fiatPerSat = price / 1e8;
+      return `1 sat = ${formatFiat(fiatPerSat, activeCurrency)}`;
+    }
+  })();
+
   const btcLabel = btcMode === 'sats' ? 'Satoshis (sats)' : 'Bitcoin (BTC)';
   const btcPlaceholder = btcMode === 'sats' ? '0' : '0.00000000';
   const btcSymbol = btcMode === 'sats' ? 'sats' : '₿';
@@ -292,7 +311,7 @@ const Index = () => {
         ) : (
           <div className="flex items-center gap-2 flex-wrap justify-center">
             <Badge className="text-base px-5 py-1.5 bg-orange-500 hover:bg-orange-500 text-white rounded-full shadow-md shadow-orange-500/20">
-              1 BTC = {formatFiat(price, activeCurrency)}
+              {priceBadgeText}
             </Badge>
             <button
               onClick={() => refetch()}
