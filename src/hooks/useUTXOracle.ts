@@ -50,6 +50,6 @@ export function useUTXOracle() {
     // Seed with cached data on first load for instant display
     initialData: loadFromCache() ?? undefined,
     refetchInterval: 60_000, // refresh every 60 seconds
-    staleTime: 30_000,
+    staleTime: 0, // always fetch fresh on load
   });
 }
