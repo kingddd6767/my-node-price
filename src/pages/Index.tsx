@@ -647,7 +647,7 @@ const Index = () => {
         </a>
         <span className="text-zinc-300 dark:text-zinc-700">·</span>
         <Link to="/changelog" className="text-xs text-zinc-400 dark:text-zinc-600 hover:text-orange-500 transition-colors">
-          v1.3
+          v1.4
         </Link>
       </div>
     </div>

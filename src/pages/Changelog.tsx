@@ -10,6 +10,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4',
+    date: '2026-06-20',
+    changes: [
+      'Added favicon — orange ₿ icon shows in browser tab and on home screen',
+      'Price now refreshes immediately on page load instead of waiting',
+      'Price badge turns red and shows a warning if the price is over 24 hours old — indicates node may be down',
+      'Amber warning still shows when node is unreachable but price is still fresh from cache',
+    ],
+  },
+  {
     version: '1.3',
     date: '2026-06-19',
     changes: [
