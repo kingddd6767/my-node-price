@@ -77,6 +77,7 @@ const Index = () => {
 
   const { data, isLoading, isError, refetch, isFetching } = useUTXOracle();
   const isUsingCache = isError && !!data;
+  const isPriceStale = !!data && (Date.now() - new Date(data.updated_at).getTime()) > 24 * 60 * 60 * 1000;
 
   // ── read URL params once on mount ────────────────────────────────────────
   const urlParams = useRef(getUrlParams());
@@ -308,7 +309,7 @@ const Index = () => {
           </Badge>
         ) : (
           <div className="flex items-center gap-2 flex-wrap justify-center">
-            <Badge className="text-base px-5 py-1.5 bg-orange-500 hover:bg-orange-500 text-white rounded-full shadow-md shadow-orange-500/20">
+            <Badge className={`text-base px-5 py-1.5 text-white rounded-full shadow-md ${isPriceStale ? 'bg-red-500 hover:bg-red-500 shadow-red-500/20' : 'bg-orange-500 hover:bg-orange-500 shadow-orange-500/20'}`}>
               {priceBadgeText}
             </Badge>
             <button
@@ -326,10 +327,16 @@ const Index = () => {
             )}
           </div>
         )}
-        {isUsingCache && (
+        {isUsingCache && !isPriceStale && (
           <span className="text-xs text-amber-500 dark:text-amber-400 flex items-center gap-1">
             <AlertCircle className="w-3 h-3" />
             Node unreachable — showing cached price from {formatTimeAgo(data!.updated_at)}
+          </span>
+        )}
+        {isPriceStale && (
+          <span className="text-xs text-red-500 dark:text-red-400 flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-full px-3 py-1">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            Price is over 24 hours old — node may be down
           </span>
         )}
       </div>
