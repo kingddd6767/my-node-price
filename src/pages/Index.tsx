@@ -107,13 +107,19 @@ const Index = () => {
   const btcLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [btcLabelFlash, setBtcLabelFlash] = useState(false);
 
+  // Toggle sats/btc while keeping the fiat value as the anchor — just reconvert the BTC display
+  const toggleBtcMode = (next: 'sats' | 'btc') => {
+    setBtcMode(next);
+    setActivePreset(null);
+    if (fiatInput && price) {
+      const sats = (parseFloat(fiatInput) / price) * 1e8;
+      setBtcInput(next === 'sats' ? String(Math.round(sats)) : formatBTC(sats));
+    }
+  };
+
   const handleBtcLabelDown = () => {
     btcLongPressTimer.current = setTimeout(() => {
-      const next = btcMode === 'sats' ? 'btc' : 'sats';
-      setBtcMode(next);
-      setFiatInput('');
-      setBtcInput('');
-      setActivePreset(null);
+      toggleBtcMode(btcMode === 'sats' ? 'btc' : 'sats');
       setBtcLabelFlash(true);
       setTimeout(() => setBtcLabelFlash(false), 600);
     }, 600);
@@ -159,16 +165,28 @@ const Index = () => {
   }, [price, btcMode]);
 
   // ── currency switcher ────────────────────────────────────────────────────
+  // Keep the BTC/sats value as the anchor — fiat is recomputed once the new rate loads
+  const [pendingFiatRecompute, setPendingFiatRecompute] = useState(false);
+
   const switchCurrency = useCallback((currency: string) => {
     setActiveCurrency(currency);
     setSavedCurrency(currency);
-    setFiatInput('');
-    setBtcInput('');
     setActivePreset(null);
     setPickerOpen(false);
     setCurrencyInput('');
     setCurrencyError('');
-  }, [setSavedCurrency]);
+    if (btcInput) setPendingFiatRecompute(true);
+  }, [setSavedCurrency, btcInput]);
+
+  // Recompute fiat from the BTC value once the new currency's price is available
+  useEffect(() => {
+    if (!pendingFiatRecompute || !price || !btcInput) return;
+    const val = parseFloat(btcInput);
+    if (isNaN(val)) return;
+    setPendingFiatRecompute(false);
+    const btcVal = btcMode === 'sats' ? val / 1e8 : val;
+    setFiatInput((btcVal * price).toFixed(2));
+  }, [pendingFiatRecompute, price, btcInput, btcMode]);
 
   const handlePickerSubmit = () => {
     const code = currencyInput.trim().toUpperCase();
@@ -458,13 +476,7 @@ const Index = () => {
                 {btcLabel}
               </label>
               <button
-                onClick={() => {
-                  const next = btcMode === 'sats' ? 'btc' : 'sats';
-                  setBtcMode(next);
-                  setFiatInput('');
-                  setBtcInput('');
-                  setActivePreset(null);
-                }}
+                onClick={() => toggleBtcMode(btcMode === 'sats' ? 'btc' : 'sats')}
                 className="text-xs text-zinc-400 hover:text-orange-500 transition-colors flex items-center gap-1"
                 title="Switch between sats and BTC"
               >
