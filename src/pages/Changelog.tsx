@@ -10,6 +10,15 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.5',
+    date: '2026-09-07',
+    changes: [
+      'Switching between currencies (e.g. USD ↔ KES ↔ EUR) now preserves your amount — the BTC/sats value stays fixed and the fiat display reconverts',
+      'Switching between sats and BTC mode also keeps your values — the fiat amount stays fixed and the BTC display reformats',
+      'Flip back and forth freely between any currencies or units without losing your input',
+    ],
+  },
+  {
     version: '1.4',
     date: '2026-06-20',
     changes: [
