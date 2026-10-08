@@ -10,6 +10,14 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.6',
+    date: '2026-10-08',
+    changes: [
+      'Fixed: shared links with non-USD currencies (e.g. KES) showed the wrong sats value',
+      'The conversion now waits for the currency exchange rate to load before calculating, instead of falling back to the USD rate',
+    ],
+  },
+  {
     version: '1.5',
     date: '2026-09-07',
     changes: [
