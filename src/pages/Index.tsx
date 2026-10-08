@@ -151,18 +151,22 @@ const Index = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // When price loads and we have URL params, recalculate from fiat to keep values fresh
+  // When price loads and we have URL params, recalculate from fiat to keep values fresh.
+  // For non-USD currencies, wait until the exchange rate has loaded too — otherwise
+  // the conversion would use rate=1 (USD) and produce the wrong sats value.
   const urlParamsApplied = useRef(false);
   useEffect(() => {
-    if (!price || urlParamsApplied.current) return;
+    if (urlParamsApplied.current) return;
     if (!urlParams.current.fiat) return;
+    if (!usdPrice) return;
+    if (!isUSD && !rateData) return; // wait for exchange rate for non-USD currencies
     urlParamsApplied.current = true;
     const val = parseFloat(urlParams.current.fiat);
     if (isNaN(val)) return;
     const sats = (val / price) * 1e8;
     const mode = urlParams.current.mode ?? btcMode;
     setBtcInput(mode === 'sats' ? String(Math.round(sats)) : formatBTC(sats));
-  }, [price, btcMode]);
+  }, [price, usdPrice, rateData, isUSD, btcMode]);
 
   // ── currency switcher ────────────────────────────────────────────────────
   // Keep the BTC/sats value as the anchor — fiat is recomputed once the new rate loads
